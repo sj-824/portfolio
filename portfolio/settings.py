@@ -1,4 +1,3 @@
-from .settings_common import *
 
 """
 Django settings for portfolio project.
@@ -176,7 +175,7 @@ LOGGING = {
     'handlers':{
         'file':{
             'level':'INFO',
-            'class':'logging.handler.sTimedRotatingFileHandler',
+            'class':'logging.handlers.TimedRotatingFileHandler',
             'filename':os.path.join(BASE_DIR,'logs/django.log'),
             'formatter':'prod',
             'when':'D',
