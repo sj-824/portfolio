@@ -126,9 +126,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 LOGIN_URL = 'accounts:login'
@@ -178,7 +176,7 @@ LOGGING = {
     'handlers':{
         'file':{
             'level':'INFO',
-            'class':'logging.handlersTimedRotatingFileHandler',
+            'class':'logging.handler.sTimedRotatingFileHandler',
             'filename':os.path.join(BASE_DIR,'logs/django.log'),
             'formatter':'prod',
             'when':'D',
