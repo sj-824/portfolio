@@ -1,0 +1,15 @@
+{% extends 'animeval/base.html' %}
+{% load static %}
+
+{% block content %}
+{% if not anime_list.exists %}
+    <div>
+        <p>該当するアニメは登録されていません</p>
+    </div>
+{% endif %}
+<div>
+    {% for anime in anime_list %}
+        <p>{{anime}}</p>
+    {% endfor %}
+</div>
+{% endblock content %}

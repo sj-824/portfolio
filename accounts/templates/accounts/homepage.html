@@ -1,0 +1,64 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static '/css/homepage.css' %}">
+    <script src="https://kit.fontawesome.com/3002737d6d.js" crossorigin="anonymous"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div id = 'wrapper'>
+        <section id = 'title'>
+            <h1></h1>
+        </section>
+        <div id = 'enter'>
+            <div id = 'enter-context'>
+                Press the Enter Key
+            </div>
+        </div>
+        <div id = 'login' class = 'is-show'>
+            <a href="{% url 'accounts:user_create' %}"><h2>Sign up</h2></a>
+            <h2>or</h2>
+            <a href="{% url 'accounts:login' %}"><h2>Login</h2></a>
+        </div>
+        <div id = 'introduction' class = 'is-show'>
+            <div id = 'intro-title' >
+                <p>どんなサイト？</p>
+                <p id = 'click' class = 'flash'>Click!</p>
+            </div>
+            <div>
+                <div id = 'info'>
+                    <div class = 'info-detail'>
+                        <p>アニメのレビューを投稿/閲覧！<i class="fas fa-pencil-ruler fa-2x"></i></p>
+                        <p>
+                            自分の好きなアニメをレビューして投稿してみよう！
+                            あなたの好きなアニメをみんなに知ってもらうと同時に
+                            みんなが好きなアニメも知れるサイトです！
+                        </p>
+                    </div>
+                    <div class = 'info-detail'>
+                        <p>おすすめのアニメを表示！<i class="fas fa-tv fa-2x"></i></p>
+                        <p>
+                            閲覧したレビュー情報を元にあなたにおすすめできるアニメを提供します！
+                            たくさん閲覧すればするほど精度は上がっていくので、気になる投稿は
+                            必ず見にいくようにしよう！
+                        </p>
+                    </div>
+                    <div class = 'info-detail'>
+                        <p>人気のアニメがわかる！<i class="fas fa-sort-amount-up fa-2x"></i></p>
+                        <p>
+                            今、人気の高いアニメがわかる！
+                            最新のアニメの評価を確認して、
+                            お気に入りアニメに追加しよう！
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+<script src = "{% static '/javascript/homepage.js' %}"></script>
+</body>
+</html>

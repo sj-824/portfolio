@@ -1,0 +1,10 @@
+{% extends 'accounts/base2.html' %}
+
+
+{% block content %}
+<p>
+    本登録が完了しました。
+    下記URLへアクセスし、プロフィールを作成してください。
+    <a href="{% url 'animeval:create_profile' %}">プロフィール作成へ</a>
+</p>
+{% endblock %}

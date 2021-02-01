@@ -1,0 +1,162 @@
+{% extends 'animeval/base.html' %}
+{% load static %} 
+{%block content%}
+    <link rel="stylesheet" href="{% static '/css/post.css' %}">
+    <div id = 'wrapper'>
+        <div id = 'review'>
+            <section id = 'title'>
+                <h4>{{context}}</h4>
+                <h4>レビューを書いてみよう</h4>
+            </section> 
+            
+            <section id = 'item'>
+                <form action="" method = 'POST'>{% csrf_token %}
+                    <div>
+                        <p>アニメタイトル</p>
+                        <input type="text" name = 'anime' id = 'anime-title' onkeyup ='inputCheck();' placeholder="正式名称でお願いします">
+                        <ul id = 'search'></ul>
+                    </div>
+                    <div id = 'spoiler-question'>
+                        <p>ネタバレを含みますか？</p>
+                        <p>
+                            No<input type="radio" value = '0' name = 'spoiler' checked = 'checked'>
+                            Yes<input type="radio" value = '1' name = 'spoiler'>
+                        </p>
+                    </div>
+                    <div id = 'review-content'>
+                        <p>レビュー(1行目はタイトルを記入してください)</p>
+                        <textarea name="review" id="" cols="50" rows="10"></textarea>
+                    </div>
+                    <div id='evaluation'>
+                        <div>
+                            <p>ストーリー</p>
+                            <div class="story-stars">
+                                <input id="star5" type="radio" name="eva_senario" value="5" />
+                                <label for="star5">★</label>
+                                <input id="star4" type="radio" name="eva_senario" value="4" />
+                                <label for="star4">★</label>
+                                <input id="star3" type="radio" name="eva_senario" value="3" />
+                                <label for="star3">★</label>
+                                <input id="star2" type="radio" name="eva_senario" value="2" />
+                                <label for="star2">★</label>
+                                <input id="star1" type="radio" name="eva_senario" value="1" />
+                                <label for="star1">★</label>
+                            </div>
+                        </div>
+                        <div>
+                            <p>作画</p>
+                            <div class="draw-stars">
+                                <input id="d-star5" type="radio" name="eva_drawing" value="5" />
+                                <label for="d-star5">★</label>
+                                <input id="d-star4" type="radio" name="eva_drawing" value="4" />
+                                <label for="d-star4">★</label>
+                                <input id="d-star3" type="radio" name="eva_drawing" value="3" />
+                                <label for="d-star3">★</label>
+                                <input id="d-star2" type="radio" name="eva_drawing" value="2" />
+                                <label for="d-star2">★</label>
+                                <input id="d-star1" type="radio" name="eva_drawing" value="1" />
+                                <label for="d-star1">★</label>
+                            </div>
+                        </div>
+                        <div>
+                        <p>音楽</p>
+                            <div class="music-stars">
+                                <input id="m-star5" type="radio" name="eva_music" value="5" />
+                                <label for="m-star5">★</label>
+                                <input id="m-star4" type="radio" name="eva_music" value="4" />
+                                <label for="m-star4">★</label>
+                                <input id="m-star3" type="radio" name="eva_music" value="3" />
+                                <label for="m-star3">★</label>
+                                <input id="m-star2" type="radio" name="eva_music" value="2" />
+                                <label for="m-star2">★</label>
+                                <input id="m-star1" type="radio" name="eva_music" value="1" />
+                                <label for="m-star1">★</label>
+                            </div>
+                        </div>
+                        <div>
+                        <p>キャラクター</p>
+                            <div class="chara-stars">
+                                <input id="ch-star5" type="radio" name="eva_character" value="5" />
+                                <label for="ch-star5">★</label>
+                                <input id="ch-star4" type="radio" name="eva_character" value="4" />
+                                <label for="ch-star4">★</label>
+                                <input id="ch-star3" type="radio" name="eva_character" value="3" />
+                                <label for="ch-star3">★</label>
+                                <input id="ch-star2" type="radio" name="eva_character" value="2" />
+                                <label for="ch-star2">★</label>
+                                <input id="ch-star1" type="radio" name="eva_character" value="1" />
+                                <label for="ch-star1">★</label>
+                            </div>
+                        </div>
+                        <div>
+                        <p>声優</p>
+                            <div class="cv-stars">
+                                <input id="cv-star5" type="radio" name="eva_cv" value="5" />
+                                <label for="cv-star5">★</label>
+                                <input id="cv-star4" type="radio" name="eva_cv" value="4" />
+                                <label for="cv-star4">★</label>
+                                <input id="cv-star3" type="radio" name="eva_cv" value="3" />
+                                <label for="cv-star3">★</label>
+                                <input id="cv-star2" type="radio" name="eva_cv" value="2" />
+                                <label for="cv-star2">★</label>
+                                <input id="cv-star1" type="radio" name="eva_cv" value="1" />
+                                <label for="cv-star1">★</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id = 'button'>
+                        <input type="submit" value = '登録' name = 'post'>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+    
+    <script>
+        const list = [
+            {% for anime in anime_title_list %}
+            "{{anime}}",
+            {% endfor %}
+        ];
+        
+        function inputCheck(){
+            render();
+            const nameList = []
+            let elInput = document.getElementById('anime-title').value;
+            let elIn = document.getElementById('search');
+            list.forEach( (item) => {
+                if (elInput !== ''){
+                    if (item.startsWith(elInput)) {
+                        nameList.push(item);
+                    }
+                }
+            });
+            nameList.forEach((item) => {
+                const newEl = document.createElement('li');
+                let newCtx = document.createTextNode(item);
+                newEl.appendChild(newCtx);
+                newEl.setAttribute('class','anime-list');
+                elIn.appendChild(newEl);
+            })
+            clickEvent();
+        }
+
+        let render = () => {
+            const animeList = document.getElementById('search');
+            animeList.innerHTML = '';
+        }    
+
+        let clickEvent = () => {
+            document.getElementById('search').addEventListener('click', (e) => {
+                console.log(e.target);
+                document.getElementById('anime-title').value = e.target.textContent;
+                render();
+            })
+        }
+
+
+
+
+
+        </script>
+{%endblock content%}

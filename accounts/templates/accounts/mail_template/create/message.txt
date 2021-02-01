@@ -1,0 +1,8 @@
+{{ user.email }}様
+会員登録手続きを行っていただきありがとうございます。
+
+下記URLにアクセスいただき、引き続き会員登録をお願いいたします。
+※会員登録手続きはまだ完了しておりません。
+
+本登録URL
+{{ protocol }}://{{ domain }}{% url 'accounts:user_create_complete' token %}
