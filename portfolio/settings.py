@@ -144,8 +144,8 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 
 # 静的ファイルを配置する場所
-STATIC_ROOT = 'usr/share/nginx/html/static'
-MEDIA_ROOT = 'usr/share/nginx/html/media'
+STATIC_ROOT = '/usr/share/nginx/html/static'
+MEDIA_ROOT = '/usr/share/nginx/html/media'
 
 # Amazon SES関連設定
 AWS_SES_ACCESS_KEY_ID = env('AWS_SES_ACCESS_KEY_ID')
