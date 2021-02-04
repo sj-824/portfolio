@@ -4,6 +4,7 @@ from django.views import generic
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, get_user_model, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import (LoginView, LogoutView)
 from .forms import ProfileForm, ReviewForm, CreateComment, CreateReply
 from accounts.models import User
@@ -29,8 +30,8 @@ class OnlyMypageMixin(UserPassesTestMixin):
         profile = ProfileModel.objects.get (user = self.request.user)
         return profile.pk == self.kwargs['pk']
 
-class CreateProfile(generic.CreateView):
-    template_name = 'create_profile.html'
+class CreateProfile(LoginRequiredMixin,generic.CreateView):
+    template_name = 'animeval/create_profile.html'
     model = ProfileModel
     form_class = ProfileForm
     success_url = reverse_lazy ('animeval:home')
@@ -42,7 +43,7 @@ class CreateProfile(generic.CreateView):
         profile.save()
         return super().form_valid(form)
 
-class UpdateProfile(OnlyMypageMixin,generic.UpdateView):
+class UpdateProfile(LoginRequiredMixin,OnlyMypageMixin,generic.UpdateView):
     template_name = 'animeval/update_profile.html'
     model = ProfileModel
     form_class = ProfileForm
@@ -149,28 +150,34 @@ class RecAnime:
         
         return context3
 
-class Home(generic.ListView,RecAnime):
+class Home(LoginRequiredMixin,generic.ListView,RecAnime):
     template_name = 'animeval/home.html'
     model = ReviewModel
     paginate_by = 2
-    
+
+    def get(self,request,**kwargs):
+        if not ProfileModel.objects.filter(user = self.request.user).exists():
+            return redirect('animeval:create_profile')
+        return super().get(request,**kwargs)
+
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
-        context = context | {'kana_list' : self.kana_list()}
+        context.update (kana_list = self.kana_list())
         recanime = RecAnime()
         if recanime.get_rec_anime(self.request):
-            context = context | recanime.get_rec_anime(self.request)
+            context.update(recanime.get_rec_anime(self.request))
         if recanime.anime_ranking(self.request):
-            context = context | recanime.anime_ranking(self.request)
-        context = context | {'profile' : ProfileModel.objects.get(user = self.request.user)}
+            context.update(recanime.anime_ranking(self.request))
+        context.update({'profile' : ProfileModel.objects.get(user = self.request.user)})
         return context
+    
 
     def kana_list(self):
         kana = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'
         kana_list = [['あ','い','う','え','お'],['か','き','く','け','こ'],['さ','し','す','せ','そ'],['た','ち','つ','て','と'],['な','に','ぬ','ね','の'],['は','ひ','ふ','へ','ほ'],['ま','み','む','め','も'],['や','ゆ','よ'],['ら','り','る','れ','ろ'],['わ','を','ん']]
         return kana_list
 
-class MyPage(OnlyMypageMixin,generic.DetailView):
+class MyPage(LoginRequiredMixin,OnlyMypageMixin,generic.DetailView):
     template_name = 'animeval/mypage.html'
     model = ProfileModel
     context_object_name = 'profile'
@@ -192,10 +199,10 @@ class MyPage(OnlyMypageMixin,generic.DetailView):
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         context2 = self.get_reviews()
-        context = context | context2
+        context = context.update(context2)
         return context
 
-class AnimeList(generic.ListView):
+class AnimeList(LoginRequiredMixin,generic.ListView):
     template_name = 'animeval/anime_list.html'
     model = AnimeModel
     context_object_name = 'anime_list'
@@ -206,9 +213,23 @@ class AnimeList(generic.ListView):
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
-        context = context | {'profile' : ProfileModel.objects.get(user = self.request.user)}
+        context.update({'profile' : ProfileModel.objects.get(user = self.request.user)})
         return context
 
+class AnimeDetail(generic.DetailView):
+    model = AnimeModel
+    template_name = 'animeval/anime_detail.html'
+    context_object_name = 'anime'
+
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+        review_list = ReviewModel.objects.select_related('profile').filter(anime__pk = self.kwargs.get('pk'))
+        if review_list.exists():
+            context.update({'review_list' : review_list})
+        context.update({'profile' : ProfileModel.objects.get(user = self.request.user)})
+        return context
+
+@login_required
 def create_review(request):
     profile = ProfileModel.objects.get(user = request.user)  # profileを取得
 
@@ -275,6 +296,7 @@ def create_review(request):
 
     return render(request,'animeval/create_review.html',{'form' : form, 'profile' : profile, 'anime_title_list' : anime_title_list})
 
+@login_required
 def update_review(request,pk):
     review = ReviewModel.objects.get (pk = pk)
     profile = ProfileModel.objects.get(user = request.user)
@@ -305,13 +327,14 @@ def update_review(request,pk):
 #     profile_id = ProfileModel.objects.get(user = request.user)  # redirect用のidを取得
 #     return redirect('profile', pk = profile_id.id)
 
-class DeleteReview(generic.DeleteView):
+class DeleteReview(LoginRequiredMixin,generic.DeleteView):
     model = ReviewModel
     
     def get_success_url(self):
         profile_id = ProfileModel.objects.get(user = self.request.user)
         return reverse_lazy('animeval:profile', kwargs = {'pk' : profile_id})
 
+@login_required
 def review_detail(request,pk):
     review = ReviewModel.objects.get(pk = pk)  # reviewを取得
     profile = ProfileModel.objects.get(user = request.user)  # profileを取得
@@ -349,6 +372,7 @@ def review_detail(request,pk):
         'comment_list' : comment_list,
         'reply_list' : reply_list})
 
+@login_required
 def like(request,review_id,user_id):
     like = Like.objects.filter(review = review_id, user = user_id)
     if like.count() == 0:
@@ -361,7 +385,7 @@ def like(request,review_id,user_id):
     
     return redirect('animeval:home')
 
-
+@login_required
 def create_comment(request,pk):
     profile = ProfileModel.objects.get(user = request.user)
     if request.method == 'POST':
@@ -375,6 +399,7 @@ def create_comment(request,pk):
     else:
         return render(request, 'animeval/create_comment.html', {'profile' : profile})
 
+@login_required
 def create_reply(request,pk):
     profile = ProfileModel.objects.get(user = request.user)
     if request.method == 'POST':

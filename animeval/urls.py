@@ -10,6 +10,7 @@ urlpatterns = [
     path('home', views.Home.as_view(), name = 'home'),
     path('mypage/<int:pk>', views.MyPage.as_view(), name = 'mypage'),
     path('anime_list/<str:char>',views.AnimeList.as_view(), name = 'anime_list'),
+    path('anime_detail/<int:pk>',views.AnimeDetail.as_view(), name = 'anime_detail'),
     path('create_review', views.create_review, name = 'create_review'),
     path('review_detail/<int:pk>', views.review_detail, name = 'review_detail'),
     path('image/<int:pk>',views.get_svg2, name = 'image'),

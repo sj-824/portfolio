@@ -1,0 +1,40 @@
+{% extends 'animeval/base.html' %}
+{% load static %}
+
+{% block content %}
+<div id = 'wrapper'>
+    <div id = 'main'>
+        <div id = anime-title>
+            <h4>{{anime.title}}</h4>
+        </div>
+        <div>
+            <div>
+                <ul>
+                    <li>放送時期 : {{anime.started}}</li>
+                    <li>制作会社 : {{anime.corporation}}</li>
+                    <li>ジャンル : {{anime.genre}}</li>
+                </ul>
+            </div>
+            <div>
+                <label for="">声優</label>
+                <p>{% for cv in anime.character_voice%}{{cv}}{% endfor %}</p>
+            </div>
+        </div>
+        <div>
+            <div id = review>
+                <h6>レビュ一覧</h6>
+            </div>
+            <div>
+                {% for review in review_list %}
+                <div>
+                    <img src="{{profile.avator.url}}" alt="" width = 100 height = 100 id = 'avator'>
+                </div>
+                <div>
+                    {{review.review_title}}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

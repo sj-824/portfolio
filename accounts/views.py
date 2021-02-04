@@ -99,3 +99,9 @@ class UserDelete(LoginRequiredMixin, generic.View):
 
 class HomePage(generic.TemplateView):
     template_name = 'accounts/homepage.html'
+
+    def get(self, request, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('accounts:logout')
+        
+        return super().get(request, **kwargs)

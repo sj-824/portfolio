@@ -9,7 +9,7 @@
 {% endif %}
 <div>
     {% for anime in anime_list %}
-        <p>{{anime}}</p>
+        <a href="{% url 'animeval:anime_detail' anime.pk %}"><p>{{anime}}</p></a>
     {% endfor %}
 </div>
 {% endblock content %}

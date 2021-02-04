@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static '/admin/css/all.css' %}">
-<link rel="stylesheet" href="{% static '/admin/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'all.css' %}">
+<link rel="stylesheet" href="{% static 'home.css' %}">
 <div id = 'wrapper'>
     {% if rec_anime%}
     <section id = 'trend'>
@@ -174,5 +174,5 @@
     </section>
 
 </div>
-<script src = "{% static '/admin/js/home.js' %}"></script>
+<script src = "{% static 'home.js' %}"></script>
 {% endblock content %}

@@ -1,33 +1,45 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'all.css' %}">
+    <link rel="stylesheet" href="{% static 'create_profile.css' %}">
     <title>Profile</title>
 </head>
 <body>
-    <div id = 'wrapper'>
-    <form action="" method = 'POST' enctype="multipart/form-data">{% csrf_token %}
-            <div>
-                <label for="">ユーザー名</label>
-                {{form.nickname}}
+    <div id = 'wrap'>
+        <div id = main>
+            <div id = 'main_content'>
+                <div id = 'title'>
+                    <h3>プロフィールを作成してください</h3>
+                </div>
+                <div id = 'profile'>
+                    <form action="" method = 'POST' enctype="multipart/form-data">{% csrf_token %}
+                        <div class = 'item'>
+                            <label for="">ユーザー名</label>
+                            {{form.nickname}}
+                        </div>
+                        <div class = 'item'>
+                            <label for="">性別</label>
+                            {{form.gender}}
+                        </div>
+                        <div class = 'item'>
+                            <label for="">お気に入りのアニメ</label>
+                            {{form.favarite_anime}}
+                        </div>
+                        <div class = 'item'>
+                            <label for="">プロフィール画像</label>
+                            {{form.avator}}
+                        </div>
+                        <section id = 'button'>
+                            <input type="submit" value = '登録'>
+                        </section>
+                    </form>
+                </div>
             </div>
-            <div>
-                <label for="">性別</label>
-                {{form.gender}}{{profile.gender}}
-            </div>
-            <div>
-                <label for="">お気に入りのアニメ</label>
-                {{form.favarite_anime}}
-            </div>
-            <div>
-                <label for="">プロフィール画像</label>
-                {{form.avator}}
-            </div>
-            <section id = 'button'>
-                <input type="submit" value = '登録'>
-            </section>
-        </form>
+        </div>
     </div>
 </body>
 </html>
