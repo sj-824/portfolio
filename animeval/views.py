@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_list_or_404, get_object_or_404
+from django.http import Http404
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib import messages
@@ -163,12 +164,13 @@ class Home(LoginRequiredMixin,generic.ListView,RecAnime):
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         context.update (kana_list = self.kana_list())
+        context2 = {'profile' : ProfileModel.objects.get(user = self.request.user)}
+        context.update (context2)
         recanime = RecAnime()
         if recanime.get_rec_anime(self.request):
             context.update(recanime.get_rec_anime(self.request))
         if recanime.anime_ranking(self.request):
             context.update(recanime.anime_ranking(self.request))
-        context.update({'profile' : ProfileModel.objects.get(user = self.request.user)})
         return context
     
 
@@ -177,30 +179,47 @@ class Home(LoginRequiredMixin,generic.ListView,RecAnime):
         kana_list = [['あ','い','う','え','お'],['か','き','く','け','こ'],['さ','し','す','せ','そ'],['た','ち','つ','て','と'],['な','に','ぬ','ね','の'],['は','ひ','ふ','へ','ほ'],['ま','み','む','め','も'],['や','ゆ','よ'],['ら','り','る','れ','ろ'],['わ','を','ん']]
         return kana_list
 
-class MyPage(LoginRequiredMixin,OnlyMypageMixin,generic.DetailView):
-    template_name = 'animeval/mypage.html'
-    model = ProfileModel
-    context_object_name = 'profile'
+# class MyPage(LoginRequiredMixin,OnlyMypageMixin,generic.DetailView):
+#     model = ProfileModel
+#     template_name = 'animeval/mypage.html'
+#     context_object_name = 'profile'
     
-    def get_reviews(self):
-        reviews = ReviewModel.objects.filter(user = self.object.user).order_by('-post_date')
-        query_word = self.request.GET.get('q')
+#     def get_reviews(self):
+#         reviews = ReviewModel.objects.filter(user = self.object.user).order_by('-post_date')
+#         query_word = self.request.GET.get('q')
 
-        if query_word:
-            reviews = reviews.filter(
-                Q(review_title__icontains=query_word) |
-                Q(review_anime_title__icontains = query_word) |
-                Q(review_content__icontains=query_word)
-            ).order_by('-post_date')
+#         if query_word:
+#             reviews = reviews.filter(
+#                 Q(review_title__icontains=query_word) |
+#                 Q(review_anime_title__icontains = query_word) |
+#                 Q(review_content__icontains=query_word)
+#             ).order_by('-post_date')
 
-        context2 = {'reviews' : reviews}
-        return context2
+#         context2 = {'reviews' : reviews}
+#         return context2
             
-    def get_context_data(self,**kwargs):
-        context = super().get_context_data(**kwargs)
-        context2 = self.get_reviews()
-        context = context.update(context2)
-        return context
+#     def get_context_data(self,**kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context2 = self.get_reviews()
+#         context = context.update(context2)
+#         return context
+
+@login_required
+def mypage(request,pk):
+    profile = get_object_or_404(ProfileModel,pk = pk)
+    if not request.user == profile.user:
+        raise Http404
+    reviews = ReviewModel.objects.filter(user = request.user).order_by('-post_date')
+    query_word = request.GET.get('q')
+
+    if query_word:
+        reviews = reviews.filter(
+            Q(review_title__icontains=query_word) |
+            Q(anime__title__icontains = query_word) |
+            Q(review_content__icontains=query_word)
+        ).order_by('-post_date')
+
+    return render(request,'animeval/mypage.html',{'profile':profile,'reviews' : reviews})
 
 class AnimeList(LoginRequiredMixin,generic.ListView):
     template_name = 'animeval/anime_list.html'
