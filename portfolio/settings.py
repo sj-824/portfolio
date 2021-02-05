@@ -148,9 +148,17 @@ STATIC_ROOT = '/usr/share/nginx/html/static'
 MEDIA_ROOT = '/usr/share/nginx/html/media'
 
 # Amazon SES関連設定
-AWS_SES_ACCESS_KEY_ID = env('AWS_SES_ACCESS_KEY_ID')
-AWS_SES_SECRET_ACCESS_KEY = env ('AWS_SES_SECRET_ACCESS_KEY')
-EMAIL_BACKEND = 'django_ses.SESBackend'
+# AWS_SES_ACCESS_KEY_ID = env('AWS_SES_ACCESS_KEY_ID')
+# AWS_SES_SECRET_ACCESS_KEY = env ('AWS_SES_SECRET_ACCESS_KEY')
+# EMAIL_BACKEND = 'django_ses.SESBackend'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# メールサーバーへの接続設定
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_HOST')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
 
 # ロギング  
 LOGGING = {
