@@ -228,7 +228,7 @@ class AnimeList(LoginRequiredMixin,generic.ListView):
 
     def get_queryset(self):
         query_word = self.kwargs.get('char')
-        return AnimeModel.objects.filter(title__istartswith = query_word)
+        return AnimeModel.objects.filter(title_kana__istartswith = query_word)
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
