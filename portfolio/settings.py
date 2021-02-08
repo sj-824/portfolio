@@ -153,6 +153,7 @@ AWS_SES_SECRET_ACCESS_KEY = env ('AWS_SES_SECRET_ACCESS_KEY')
 AWS_SWS_RESION_NAME = 'us-east-2'
 AWS_SES_RESION_ENDPOINT = 'email.us-east-2.amazonaws.com'
 EMAIL_BACKEND = 'django_ses.SESBackend'
+DEFAULT_FROM_EMAIL = 'appt39573@gmail.com'
 
 
 # メールサーバーへの接続設定
