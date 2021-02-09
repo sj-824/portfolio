@@ -419,7 +419,7 @@ def review_detail(request,pk):
             anime = review.anime
             genre_num = [key for key, value in genre.items() if value == anime.genre][0]
 
-            for i in range(len(genre_counter)):
+            for i in range(len(genre_counter) + 1):
                 if genre_num == i:
                     genre_counter[i-1] += 1
 
