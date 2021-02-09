@@ -85,52 +85,71 @@ class RecAnime:
         animes = AnimeModel.objects.all()
         user_access_review = AccessReview.objects.select_related('review').filter(user = request.user)
 
-        if user_access_review.count() > 20:
-            top_genre = self.genre_count(request)
-            access_animes = []
-            
-            for review in user_access_review:
-                anime = review.review.anime
-                if anime.genre == top_genre and not anime in access_animes:
-                    access_animes.append(anime)
-            
-            access_anime_evaluation_sum = [0,0,0,0,0]
-            for anime in access_animes:
-                anime_reviews = reviews.filter(anime = anime)
-                anime_evaluation_sum = [0,0,0,0,0]
-
-                for review in anime_reviews:
-                    anime_evaluation_sum = np.array(anime_evaluation_sum) + np.array(review.evaluation)
-                anime_evaluation_ave = [n/anime_reviews.count() for n in anime_evaluation_sum]
-
-                access_anime_evaluation_sum = np.array(access_anime_evaluation_sum) + np.array(anime_evaluation_ave)
-            
-            access_anime_evaluation_ave = [n/len(access_animes) for n in access_anime_evaluation_sum]  # アクセスしたアニメレビュー全ての平均値
-
-            anime_list = {}
-            for anime in animes.filter(genre = top_genre):
-                if not anime in access_animes:
-                    anime_review = reviews.filter(anime = anime)
-                    top_genre_anime_evaluation_sum = [0,0,0,0,0]
-
-                    if anime_review.exists():
-                        for review in anime_review:
-                            top_genre_anime_evaluation_sum = np.array(top_genre_anime_evaluation_sum) + np.array(review.evaluation)
-                        top_genre_anime_evaluation_ave = [n/anime_review.count() for n in top_genre_anime_evaluation_sum]
-
-                        evaluation_sub = np.array(top_genre_anime_evaluation_ave) - np.array(access_anime_evaluation_ave)
-                        evaluation_sqr = map(lambda x : x**2, evaluation_sub)
-                        d = math.sqrt(sum(evaluation_sqr))
-
-                        anime_list[anime] = d
-            
-            context2 = {}
-            rec_anime = min(anime_list, key = anime_list.get)
-            rec_anime_reviews = ReviewModel.objects.filter(anime = rec_anime).order_by('?')[:3]
-            context2 = {'rec_anime' : rec_anime, 'rec_anime_reviews' : rec_anime_reviews}
+        top_genre = self.genre_count(request)
+        access_animes = []
         
-            return context2
+        for review in user_access_review:
+            anime = review.review.anime
+            if anime.genre == top_genre and not anime in access_animes:
+                access_animes.append(anime)
+        
+        access_anime_evaluation_sum = [0,0,0,0,0]
+        for anime in access_animes:
+            anime_reviews = reviews.filter(anime = anime)
+            anime_evaluation_sum = [0,0,0,0,0]
+
+            for review in anime_reviews:
+                anime_evaluation_sum = np.array(anime_evaluation_sum) + np.array(review.evaluation)
+            anime_evaluation_ave = [n/anime_reviews.count() for n in anime_evaluation_sum]
+
+            access_anime_evaluation_sum = np.array(access_anime_evaluation_sum) + np.array(anime_evaluation_ave)
+        
+        access_anime_evaluation_ave = [n/len(access_animes) for n in access_anime_evaluation_sum]  # アクセスしたアニメレビュー全ての平均値
+
+        anime_list = {}
+        for anime in animes.filter(genre = top_genre):
+            if not anime in access_animes:
+                anime_review = reviews.filter(anime = anime)
+                top_genre_anime_evaluation_sum = [0,0,0,0,0]
+
+                if anime_review.exists():
+                    for review in anime_review:
+                        top_genre_anime_evaluation_sum = np.array(top_genre_anime_evaluation_sum) + np.array(review.evaluation)
+                    top_genre_anime_evaluation_ave = [n/anime_review.count() for n in top_genre_anime_evaluation_sum]
+
+                    evaluation_sub = np.array(top_genre_anime_evaluation_ave) - np.array(access_anime_evaluation_ave)
+                    evaluation_sqr = map(lambda x : x**2, evaluation_sub)
+                    d = math.sqrt(sum(evaluation_sqr))
+
+                    anime_list[anime] = d
+        
+        context2 = {}
+        if anime_list:
+            rec_anime = min(anime_list, key = anime_list.get)
+            review_count = ReviewModel.objects.filter(anime = rec_anime).count()
+            rec_anime_reviews = ReviewModel.objects.filter(anime = rec_anime).order_by('?')[:3]
+            rec_anime_rank = self.anime_rank(rec_anime)
+            context2 = {'rec_anime' : rec_anime, 'rec_anime_reviews' : rec_anime_reviews, 'rec_anime_rank' : rec_anime_rank, 'review_count' : review_count}
     
+        return context2
+    
+    def anime_rank(self,rec_anime):
+        anime_rank = {}
+        anime_list = AnimeModel.objects.all()
+        for anime in anime_list:
+            review_list = ReviewModel.objects.filter(anime = anime)
+            review_eval_sum = 0
+            for review in review_list:
+                review_eval_sum += review.evaluation_ave
+            try:
+                anime_review_ave = review_eval_sum/review_list.count()
+                anime_rank[anime.title] = anime_review_ave
+            except ZeroDivisionError:
+                pass
+        anime_sort = sorted(anime_rank.items(), reverse=True, key = lambda x : x[1])
+        ranking = [anime_sort.index(item) for item in anime_sort if rec_anime.title in item[0]]
+        return ranking[0] + 1
+
     def anime_ranking(self,request):
         animes = AnimeModel.objects.all()
         reviews = ReviewModel.objects.all()
@@ -153,7 +172,7 @@ class RecAnime:
 
 class Home(LoginRequiredMixin,generic.ListView,RecAnime):
     template_name = 'animeval/home.html'
-    model = ReviewModel
+    queryset = ReviewModel.objects.all().order_by('-post_date')
     paginate_by = 2
 
     def get(self,request,**kwargs):
@@ -164,13 +183,10 @@ class Home(LoginRequiredMixin,generic.ListView,RecAnime):
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         context.update (kana_list = self.kana_list())
+        if self.anime_ranking(self.request):
+            context.update(self.anime_ranking(self.request))
         context2 = {'profile' : ProfileModel.objects.get(user = self.request.user)}
         context.update (context2)
-        recanime = RecAnime()
-        if recanime.get_rec_anime(self.request):
-            context.update(recanime.get_rec_anime(self.request))
-        if recanime.anime_ranking(self.request):
-            context.update(recanime.anime_ranking(self.request))
         return context
     
 
@@ -178,6 +194,20 @@ class Home(LoginRequiredMixin,generic.ListView,RecAnime):
         kana = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'
         kana_list = [['あ','い','う','え','お'],['か','き','く','け','こ'],['さ','し','す','せ','そ'],['た','ち','つ','て','と'],['な','に','ぬ','ね','の'],['は','ひ','ふ','へ','ほ'],['ま','み','む','め','も'],['や','ゆ','よ'],['ら','り','る','れ','ろ'],['わ','を','ん']]
         return kana_list
+
+class Analysis(LoginRequiredMixin,generic.TemplateView,RecAnime):
+    template_name = 'animeval/analysis.html'
+    model = AnimeModel
+
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+        context2 = {'profile' : ProfileModel.objects.get(user = self.request.user)}
+        context.update (context2)
+        recanime = RecAnime()
+        if recanime.get_rec_anime(self.request):
+            context.update(recanime.get_rec_anime(self.request))
+
+        return context
 
 # class MyPage(LoginRequiredMixin,OnlyMypageMixin,generic.DetailView):
 #     model = ProfileModel
@@ -374,8 +404,20 @@ def review_detail(request,pk):
             counter = Counter.objects.get(user = request.user)  # 訪問者のCounterを取得
             genre_counter = counter.counter
 
+            # 数字とジャンルを紐付け
+            genre = {
+            1:'SF',
+            2:'ファンタジー',
+            3:'コメディ',
+            4:'バトル',
+            5:'恋愛',
+            6:'スポーツ',
+            7:'青春',
+            8:'戦争',
+            }
+
             anime = review.anime
-            genre_num = genre(anime)
+            genre_num = [key for key, value in genre.items() if value == anime.genre][0]
 
             for i in range(len(genre_counter)):
                 if genre_num == i:
@@ -544,21 +586,6 @@ def get_svg(request,pk):
     response = HttpResponse(svg, content_type = 'image/svg+xml')
     return response
 
-def anime_rank(rec_anime):
-    anime_rank = {}
-    anime_list = AnimeModel.objects.all()
-    for anime in anime_list:
-        review_list = ReviewModel.objects.filter(anime = anime)
-        review_eval_sum = 0
-        for review in review_list:
-            review_eval_sum += review.evaluation_ave
-        try:
-            anime_review_ave = review_eval_sum/review_list.count()
-            anime_rank[anime.title] = anime_review_ave
-        except ZeroDivisionError:
-            pass
-    anime_sort = sorted(anime_rank.items(), reverse=True, key = lambda x : x[1])
-    ranking = [anime_sort.index(item) for item in anime_sort if rec_anime.title in item[0]]
-    return ranking[0] + 1
+
     
 

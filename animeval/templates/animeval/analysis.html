@@ -1,0 +1,63 @@
+{% extends 'animeval/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'all.css' %}">
+<link rel="stylesheet" href="{% static 'analysis.css' %}">
+<div id = 'wrapper'>
+    <section id = 'trend'>
+        <div id = 'trend-anime'>
+            <div id = 'trend-title' class = 'link-title'>
+                <h4>あなたへのおすすめアニメ : {{rec_anime.title}}</h4>
+            </div>
+            {% if rec_anime %}
+            <div id = 'trend-info'>
+                <div id = 'trend-graph'>
+                    <p class = 'trend-info-title'>おすすめ度</p>
+                    <img src="{% url 'animeval:trend_image' rec_anime.pk %}" alt="" width = '300' height = '200'>
+                </div>
+                <div id = 'trend-detail'>
+                    <p class = 'trend-info-title'>アニメ情報</p>
+                    <ul id = 'trend-detail1'>
+                        <li>
+                            <h6>総合順位 : {{rec_anime_rank}} 位</h6>
+                        </li>
+                        <li>
+                            <h6>投稿数 : {{review_count}} 件</h6>
+                        </li>
+                        <li>
+                            <h6>ジャンル : {{rec_anime.genre}}</h6>
+                        </li>
+                    </ul>
+                </div>
+                <div id = 'reviwer-list'>
+                    <p class = 'trend-info-title'>評価しているユーザー</p>
+                    <ul id = 'reviwer-list-info'>
+                        {% for review in rec_anime_reviews %}
+                        <li>
+                            <div id = profile-info>
+                                <div>
+                                    <img src="{{review.profile.avator.url}}" alt="" width = 70 height = 70 id = 'avator'>
+                                    <p>{{review.profile.nickname}}</p>
+                                </div>
+                                <div id = review-title>
+                                    <h6><a href="{% url 'animeval:review_detail' review.pk %}">{{review.evaluation_ave}} {{review.review_title}}</a></h6>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% else %}
+            <div id = 'trend-info'>
+                <p>あなたへおすすめできるアニメはありません</p>
+
+            </div>
+            {% endif %}
+        </div>
+
+    </section>
+</div>
+<script src = "{% static 'home.js' %}"></script>
+{% endblock content %}

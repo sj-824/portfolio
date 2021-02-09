@@ -8,6 +8,7 @@ urlpatterns = [
     path('create_profile', views.CreateProfile.as_view(), name = 'create_profile'),
     path('update_profile/<int:pk>', views.UpdateProfile.as_view(), name = 'update_profile'),
     path('home', views.Home.as_view(), name = 'home'),
+    path('analysis',views.Analysis.as_view(), name = 'analysis'),
     path('mypage/<int:pk>', views.mypage, name = 'mypage'),
     path('anime_list/<str:char>',views.AnimeList.as_view(), name = 'anime_list'),
     path('anime_detail/<int:pk>',views.AnimeDetail.as_view(), name = 'anime_detail'),
