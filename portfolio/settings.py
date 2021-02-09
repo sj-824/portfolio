@@ -149,7 +149,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 
 
 LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'animeval:create_profile'
+LOGIN_REDIRECT_URL = 'animeval:home'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 
