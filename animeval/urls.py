@@ -15,6 +15,7 @@ urlpatterns = [
     path('create_review', views.create_review, name = 'create_review'),
     path('review_detail/<int:pk>', views.review_detail, name = 'review_detail'),
     path('image/<int:pk>',views.get_svg2, name = 'image'),
+    path('anime_image/<int:pk>',views.get_svg3, name = 'anime_image'),
     path('trend_image/<int:pk>',views.get_svg, name = 'trend_image'),
     path('create_comment/<int:pk>', views.create_comment, name = 'create_comment'),
     path('create_reply/<int:pk>', views.create_reply, name = 'create_reply'),

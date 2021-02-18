@@ -205,7 +205,10 @@ class Analysis(LoginRequiredMixin,generic.TemplateView,RecAnime):
         context.update (context2)
         recanime = RecAnime()
         if recanime.get_rec_anime(self.request):
+            rec_anime = recanime.get_rec_anime(self.request)['rec_anime']
+            reviews = ReviewModel.objects.filter(anime = rec_anime).order_by('?').order_by('-post_date')[:3]
             context.update(recanime.get_rec_anime(self.request))
+            context.update({'reviews':reviews})
 
         return context
 
@@ -240,6 +243,7 @@ def mypage(request,pk):
     if not request.user == profile.user:
         raise Http404
     reviews = ReviewModel.objects.filter(user = request.user).order_by('-post_date')
+    access_reviews = AccessReview.objects.filter (user = request.user).order_by('-created_at')
     query_word = request.GET.get('q')
 
     if query_word:
@@ -249,7 +253,7 @@ def mypage(request,pk):
             Q(review_content__icontains=query_word)
         ).order_by('-post_date')
 
-    return render(request,'animeval/mypage.html',{'profile':profile,'reviews' : reviews})
+    return render(request,'animeval/mypage.html',{'profile':profile,'reviews' : reviews, 'access_reviews' : access_reviews})
 
 class AnimeList(LoginRequiredMixin,generic.ListView):
     template_name = 'animeval/anime_list.html'
@@ -265,14 +269,14 @@ class AnimeList(LoginRequiredMixin,generic.ListView):
         context.update({'profile' : ProfileModel.objects.get(user = self.request.user)})
         return context
 
-class AnimeDetail(generic.DetailView):
+class AnimeDetail(LoginRequiredMixin,generic.DetailView):
     model = AnimeModel
     template_name = 'animeval/anime_detail.html'
     context_object_name = 'anime'
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
-        review_list = ReviewModel.objects.select_related('profile').filter(anime__pk = self.kwargs.get('pk'))
+        review_list = ReviewModel.objects.select_related('profile').filter(anime__pk = self.kwargs.get('pk')).order_by('?').order_by('-post_date')[:3]
         if review_list.exists():
             context.update({'review_list' : review_list})
         context.update({'profile' : ProfileModel.objects.get(user = self.request.user)})
@@ -349,39 +353,48 @@ def create_review(request):
 def update_review(request,pk):
     review = ReviewModel.objects.get (pk = pk)
     profile = ProfileModel.objects.get(user = request.user)
+
     
     pre_review = review.review_title + '\n' + review.review_content
     
     if request.method == 'POST':
-        content_split = request.POST.get('review_content').splitlines()  # レビュー内容を改行ごとにリスト化
-        object.review_title = content_split[0]  # 1行目をレビュータイトルとして保存
-        content_split.pop(0)  # レビュー内容の1行目を削除(タイトルを削除)
+        content_split = request.POST.get('review').splitlines()  # レビュー内容を改行ごとにリスト化
+        review.review_title = content_split.pop(0)  # 1行目をレビュータイトルとして保存
 
         # ネタバレの有無による
         if request.POST.get('spoiler') == '1':
             content_split.insert(0,'※ネタバレを含む')  # 1行目にネタバレを含むを挿入
         
-        object.review_content = '\r\n'.join(content_split)
-        str_values = [request.POST.get('val1'),request.POST.get('val2'),request.POST.get('val3'),request.POST.get('val4'),request.POST.get('val5')]
-        object.evaluation_value = '/'.join(str_values)
-        int_values = [int(n) for n in str_values]
-        object.evaluation_value_ave = sum(int_values)/5
-        object.save()
-        return redirect('animeval:review_detail', pk = pk)
+        review.review_content = '\r\n'.join(content_split)
+        evaluation = [
+            int(request.POST.get('eva_senario')),
+            int(request.POST.get('eva_drawing')),
+            int(request.POST.get('eva_music')),
+            int(request.POST.get('eva_character')),
+            int(request.POST.get('eva_cv')),
+        ]
+        evaluation_ave = sum(evaluation)/len(evaluation)
+        review.evaluation = evaluation
+        review.evaluation_ave = evaluation_ave
+        review.save()
 
-    return render(request, 'animeval/update_review.html', {'review' : review, 'pre_review' : pre_review, 'profile' : profile})
-
-# def delete_review(request,pk):
-#     ReviewModel.objects.get(pk = pk).delete()  # pkから取得し、削除
-#     profile_id = ProfileModel.objects.get(user = request.user)  # redirect用のidを取得
-#     return redirect('profile', pk = profile_id.id)
+        return redirect ('animeval:review_detail',pk = pk)
+    
+    else:
+        return render(request, 'animeval/update_review.html', {'review':review, 'pre_review' :pre_review, 'profile':profile})
 
 class DeleteReview(LoginRequiredMixin,generic.DeleteView):
     model = ReviewModel
     
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+        context2 = {'profile' : ProfileModel.objects.get(user = self.request.user)}
+        context.update (context2)
+        return context
+
     def get_success_url(self):
         profile_id = ProfileModel.objects.get(user = self.request.user)
-        return reverse_lazy('animeval:profile', kwargs = {'pk' : profile_id})
+        return reverse_lazy('animeval:mypage', kwargs = {'pk':profile_id.pk})
 
 @login_required
 def review_detail(request,pk):
@@ -455,6 +468,7 @@ def create_comment(request,pk):
             object = form.save(commit = False)
             object.user = request.user
             object.review = ReviewModel.objects.get(pk = pk)
+            object.profile = ProfileModel.objects.get(user = request.user)
             object.save()
             return redirect('animeval:review_detail', pk = pk)
     else:
@@ -469,6 +483,7 @@ def create_reply(request,pk):
             object = form.save(commit = False)
             object.user = request.user
             object.comment = Comment.objects.get (pk = pk)
+            object.profile = ProfileModel.objects.get(user = request.user)
             object.save()
             return redirect('animeval:review_detail', pk = object.comment.review.pk)
     else:
@@ -586,6 +601,58 @@ def get_svg(request,pk):
     response = HttpResponse(svg, content_type = 'image/svg+xml')
     return response
 
+def setPlt1(values1,label1):
+#######各要素の設定#########
+    labels = ['Senario','Drawing','Music','Character','CV']
+    angles = np.linspace(0,2*np.pi,len(labels) + 1, endpoint = True)
+    rgrids = [0,1,2,3,4,5] 
+    rader_values1 = np.concatenate([values1, [values1[0]]])
 
+#######グラフ作成##########
+    plt.rcParams["font.size"] = 16
+    fig = plt.figure(facecolor='k')
+    fig.patch.set_alpha(0)
+    ax = fig.add_subplot(1,1,1,polar = True)
+    ax.plot(angles, rader_values1, color = 'r', label = label1)
+    cm = plt.get_cmap('Reds')
+    for i in range(6):
+        z = i/5
+        rader_value3 = [n*z for n in rader_values1]
+        ax.fill(angles, rader_value3, alpha = 0.5, facecolor = cm(z))
+    ax.set_thetagrids(angles[:-1]*180/np.pi,labels, fontname = 'AppleGothic', color = 'snow', fontweight = 'bold')
+    ax.set_rgrids([])
+    ax.spines['polar'].set_visible(False)
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
     
+    ax.legend(bbox_to_anchor = (1.05,1.0), loc = 'upper left')
+
+    for grid_value in rgrids:
+        grid_values = [grid_value] * (len(labels) + 1)
+        ax.plot(angles, grid_values, color = 'snow', linewidth = 0.5,)
+    
+    for t in range(0,5):
+        ax.text(x = 0,y = t, s = t,color = 'snow')
+
+    ax.set_rlim([min(rgrids), max(rgrids)])
+    ax.set_title ('Evaluation', fontname = 'SourceHanCodeJP-Regular', pad = 20, color = 'snow')
+    ax.set_axisbelow(True)
+    
+def get_svg3(request,pk):
+    ###########high_similarity_animeの平均評価##################
+    anime = AnimeModel.objects.get(pk=pk)
+    review_list = ReviewModel.objects.filter(anime = anime)
+    count = review_list.count()
+    review_values_sum = [0,0,0,0,0]
+    for review in review_list:
+        review_values_sum = np.array(review_values_sum) + np.array(review.evaluation)
+    values1 = [n/count for n in review_values_sum]
+    values2 = [0,0,0,0,0]
+    
+    label1 = 'review_ave'
+    setPlt1(values1,label1)
+    svg = get_image()
+    plt.cla()
+    response = HttpResponse(svg, content_type = 'image/svg+xml')
+    return response
 

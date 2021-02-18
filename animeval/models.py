@@ -69,6 +69,7 @@ class Counter(models.Model):
 class AccessReview(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     review = models.ForeignKey(ReviewModel, on_delete = models.CASCADE)
+    created_at = models.DateTimeField(default = timezone.now)
 
     def __str__(self):
         return 'アクセス名:{} / レビュータイトル:{}'.format(self.user.username, self.review.review_title)
@@ -77,12 +78,14 @@ class Comment(models.Model):
     comment = models.CharField(max_length = 255)
     review = models.ForeignKey(ReviewModel, on_delete = models.CASCADE)
     user = models.ForeignKey(User,on_delete = models.CASCADE)
+    profile = models.ForeignKey(ProfileModel, on_delete = models.CASCADE, blank = True, default = 4)
     created_at = models.DateTimeField(auto_now_add = True)
 
 class ReplyComment(models.Model):
     reply = models.CharField(max_length = 255)
     comment = models.ForeignKey(Comment, on_delete = models.CASCADE)
     user = models.ForeignKey(User,on_delete = models.CASCADE)
+    profile = models.ForeignKey(ProfileModel, on_delete = models.CASCADE, blank = True, default = 4)
     created_at = models.DateTimeField(auto_now_add = True)
 
 class Like(models.Model):

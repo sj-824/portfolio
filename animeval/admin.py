@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.template.response import TemplateResponse
 from django.urls import path
-from .models import ProfileModel, ReviewModel, Counter, AccessReview, AnimeModel
+from .models import ProfileModel, ReviewModel, Counter, AccessReview, AnimeModel, Comment, ReplyComment
 from django.shortcuts import render, redirect, get_list_or_404
 from .forms import CSVUpload
 import io
@@ -12,6 +12,9 @@ admin.site.register(ProfileModel)
 admin.site.register(ReviewModel)
 admin.site.register(Counter)
 admin.site.register(AccessReview)
+admin.site.register(Comment)
+admin.site.register(ReplyComment)
+
 
 @admin.register(AnimeModel)
 class AnimeModelAdmin(admin.ModelAdmin):
