@@ -14,6 +14,7 @@
   </head>
 <body>
   <div id = 'wrap'>
+    <div id = 'wrap'>
     <!-- ナビバー -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <a class="navbar-brand" href="#">AnimEval</a>
@@ -53,7 +54,8 @@
     {% if messages %}
       {% for message in messages %}
         <div id = 'message' class = '{{message.tags}}'>
-          <p>{{message}}</p><i class="far fa-window-close fa-lg" id = 'cancel'></i>
+          <p>{{message}}</p>
+          <!-- <i class="far fa-window-close fa-lg" id = 'cancel'></i> -->
         </div>
       {% endfor %}
     {% endif %}

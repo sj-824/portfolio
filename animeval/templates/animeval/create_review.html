@@ -1,4 +1,4 @@
-{% extends 'animeval/base.html' %}
+{% extends 'animeval/base-mod.html' %}
 {% load static %} 
 {%block content%}
     <link rel="stylesheet" href="{% static 'post.css' %}">
@@ -111,8 +111,9 @@
             </section>
         </div>
     </div>
-    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        'use strict';
         const list = [
             {% for anime in anime_title_list %}
             "{{anime}}",
@@ -153,5 +154,16 @@
                 render();
             })
         }
+
+        $(function () {
+            $('input,textarea')
+            .focus(function () {
+                $(this).css('background','#333').css('color','aliceblue');
+            })
+            .blur(function () {
+                $(this).css('background','white').css('color','#333');
+            })
+        })
+
         </script>
 {%endblock content%}

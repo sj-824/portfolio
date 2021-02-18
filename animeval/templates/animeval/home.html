@@ -1,129 +1,99 @@
-{% extends 'animeval/base.html' %}
+{% extends 'animeval/base-mod.html' %}
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'all.css' %}">
-<link rel="stylesheet" href="{% static 'home.css' %}">
-<div id = 'wrapper'>
-    <section id = 'trend'>
-        <div id = 'trend-anime'>
-            <div id = 'trend-title' class = 'link-title'>
-                <h4>あなたへのおすすめアニメを分析してみよう！</h4>
-                <div id = 'analysis-info'>
-                        <p id = >おすすめアニメとは？
-                            <br>アクセスしたレビューから
-                            <br>あなたの好むアニメを分析します
-                        </p>
-                        <a href="{%url 'animeval:analysis' %}" id = 'analysis-btn'>分析する</a>
-                </div>
-            </div>
-        </div>
-    </section>
-    {% if anime_list %}
-    <section>
-        <div id = 'anime-rank'>
-            <div id = 'rank-title'>
-                <h4>今週の人気アニメ</h4>
-            </div>
-            <div id = 'anime-rank-list'>
-                {% for anime in anime_list %}
-                <div class = 'anime'>
-                    <div class = 'anime-title'>
-                        {% if forloop.first %}
-                        <h5><i class="fas fa-crown" id = 'first'></i> {{forloop.counter}} 位</h5>
-                        {% elif forloop.last %}
-                        <h5><i class="fas fa-crown" id = third></i> {{forloop.counter}} 位</h5>
-                        {% else %}
-                        <h5><i class="fas fa-crown" id = 'second'></i> {{forloop.counter}} 位</h5>
-                        {% endif %}
-                        <p>{{anime.title}}</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-    {% endif %}
+<link rel="stylesheet" href="{% static 'home-mod.css' %}">
 
-    <section id = contents>
-        <div id = 'review-list'>
-            <p class = 'link-title'>レビュー一覧</p>
-            <div id = 'main'>
+    <div class = 'header-container'>
+        <section id = 'analysis-anime'>
+            <h1 class = 'title'>おすすめアニメを分析してみよう！</h1>
+            <div class = 'content'>
+                <div>
+                    <h2>おすすめアニメとは？</h2>
+                    <p><br>アクセスしたレビューから
+                    <br>あなたの好むアニメを分析します</p>
+                </div>
+                <div>
+                    <a href="{%url 'animeval:analysis' %}" class = 'btn'>分析する</a>
+                </div>
+            </div>
+        </section>
+
+        <section id = 'rank-anime'>
+            <h1 class = 'title'>今週の人気アニメ！</h1>
+            <div class = 'content'>
+
+                {% for anime in anime_list %}
+
+                    {% if forloop.first %}
+                        <div class = 'anime-title'>
+                            <h5><i class="fas fa-crown" id = 'first'></i> {{forloop.counter}} 位</h5>
+                            <p>{{anime.title}}</p>
+                        </div>
+                    {% elif forloop.last %}
+                        <div class = 'anime-title'>
+                            <h5><i class="fas fa-crown" id = third></i> {{forloop.counter}} 位</h5>
+                            <p>{{anime.title}}</p>
+                        </div>
+                    {% else %}
+                        <div class = 'anime-title'>
+                            <h5><i class="fas fa-crown" id = 'second'></i> {{forloop.counter}} 位</h5>
+                            <p>{{anime.title}}</p>
+                        </div>
+                    {% endif %}
+                    
+                {% endfor %}
+                
+            </div>
+        </section>
+    </div>
+
+    <div class = 'main-container'>
+        <section id = 'review-list'>
+            <h1 class = 'title'>レビュー一覧</h1>
+            <div class = 'content'>
                 {% for review in reviewmodel_list %}
-                <div id = 'review-item'>
-                    <div id = 'profile'>
-                        <img src="{{review.profile.avator.url}}" alt="" width = 100 height = 100 id = 'avator'>
-                        <p>{{review.profile.nickname}}</p>
-                    </div>
-                    <div id = 'review'>
-                        <div id = 'title'>
-                            <a href="{% url 'animeval:review_detail' review.pk %}">
-                            <div id = 'review-title'>
-                                <h4>{{review.evaluation_ave}}</h4>
-                                <h4>{{review.review_title}}</h4>
+                <div class = 'review'>
+                    <div class = 'review-header'>
+                        <div class = 'profile-items'>
+                            <img src="{{review.profile.avator.url}}" alt="" width = 100 height = 100 class = 'avator'>
+                            <p>{{review.profile.nickname}}</p>
+                        </div>
+                        <div class = 'review-items'>
+                            <div class = 'review-title'>
+                                <a href="{% url 'animeval:review_detail' review.pk %}">{{review.evaluation_ave}} {{review.review_title}}</a>
                             </div>
-                            </a>
                             <div id = 'anime-title'>
                                 <h6>Anime : {{review.anime.title}}</h6>
                                 <h6>Genre : {{review.anime.genre}}</h6>
                             </div>
                         </div>
-                        <div id = 'review-content'>
-                            <p id = 'content'>{{review.review_content | linebreaksbr}}</p>
-                            <a href="{% url 'animeval:review_detail' review.pk %}"><p id = 'detail-btn'>続きを見る</p></a>
-                        </div>
-                        <div id = 'icon'>
-                            <p>Comment <i class="fas fa-comments"></i> ({{review.comment_set.count}})</p> 
-                            <p><a id = 'like' href="{% url 'animeval:like' review.pk request.user.pk %}">イイね<i class="fas fa-thumbs-up"></i></a>
-                                ({{review.like_set.count}})
-                            </p>
-                            <p>{{review.post_date}}</p>
-                        </div>
                     </div>
+                    <div class = 'review-content'>
+                        <p>{{review.review_content | linebreaksbr}}</p>
+                        <a href="{% url 'animeval:review_detail' review.pk %}">続きを見る</a>
+                    </div>
+                    <div class = 'review-footer'>
+                        <ul>
+                            <li>Comment <i class="fas fa-comments"></i> ({{review.comment_set.count}})</li>
+                            <li><a id = 'like' href="{% url 'animeval:like' review.pk request.user.pk %}">イイね<i class="fas fa-thumbs-up"></i> ({{review.like_set.count}})</a></li>
+                            <li>{{review.post_date}}</li>
+                        </ul>
+                    </div>
+                    
+
+                    {% empty %}
+                    <div id = 'review-item'>
+                        <p>投稿はありません</p>
+                    </div>                
                 </div>
-                {% empty %}
-                <div id = 'review-item'>
-                    <p>投稿はありません</p>
-                </div>                
                 {% endfor %}
             </div>
-            <div id = 'pagination'>
-                {% if is_paginated %}
-                    <ul class = 'pagination'>
-                        {% if page_obj.has_previous %}
-                            <li class = 'page-item'>
-                                <a href="?page={{ page_obj.previous_page_number }}">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                        {% endif %}
-            
-                        {% for page_num in page_obj.paginator.page_range %}
-                            {% if page_obj.number == page_num %}
-                            <li class = 'page-item active'>
-                                <a href="#">{{page_num}}</a>
-                            </li>
-                            {% else %}
-                            <li class = 'page-item'>
-                                <a href="?page={{ page_num }}">{{page_num}}</a>
-                            </li>
-                            {% endif %}
-                        {% endfor %}
-            
-                        {% if page_obj.has_next %}
-                        <li class = 'page-item'>
-                            <a href="?page={{ page_obj.next_page_number }}">
-                                <span aria-hidden = 'true'>&raquo;</span>
-                            </a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                {% endif %}
-            </div>
-        </div>
-        <div id = 'link-list'>
-            <p class = 'link-title'>アニメ一覧</p>
-            <div id = 'anime-list' class = 'link'>
+        </section>
+
+        <section id = 'anime-list'>
+            <h1 class = 'title'>アニメ一覧</h1>
+            <div class = 'content'>
                 <ul id = 'kana-list'>
                     {% for kana in kana_list %}
                         <div>
@@ -134,10 +104,43 @@
                     {% endfor %}
                 </ul>
             </div>
-        </div>
-    </section>
-    
+        </section>
+    </div>
 
-</div>
+    <div id = 'pagination'>
+        {% if is_paginated %}
+            <ul class = 'pagination'>
+                {% if page_obj.has_previous %}
+                    <li class = 'page-item'>
+                        <a href="?page={{ page_obj.previous_page_number }}">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+    
+                {% for page_num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == page_num %}
+                    <li class = 'page-item active'>
+                        <a href="#">{{page_num}}</a>
+                    </li>
+                    {% else %}
+                    <li class = 'page-item'>
+                        <a href="?page={{ page_num }}">{{page_num}}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+    
+                {% if page_obj.has_next %}
+                <li class = 'page-item'>
+                    <a href="?page={{ page_obj.next_page_number }}">
+                        <span aria-hidden = 'true'>&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        {% endif %}
+    </div>
+
+
 <script src = "{% static 'home.js' %}"></script>
 {% endblock content %}

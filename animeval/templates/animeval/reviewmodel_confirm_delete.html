@@ -1,0 +1,21 @@
+{% extends 'animeval/base-mod.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'delete.css' %}">
+<form action="" method = 'POST'>
+    {% csrf_token %}
+    <p>本当に削除しますか?</p>
+    <section class = 'review'>
+        <h1>対象レビュー</h1>
+        <ul>
+            <li>タイトル : {{object.review_title}}</li>
+            <li>アニメ : {{object.anime.title}}</li>
+        </ul>
+    </section>
+    <div class = 'btns'>
+        <a class = 'btn' href="{%url 'animeval:home' %}">Cancel</a>
+        <input class = 'btn' type="submit" value = 'Delete'>
+    </div>
+</form>
+{% endblock content %}

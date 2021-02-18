@@ -1,4 +1,4 @@
-{% extends 'animeval/base.html' %}
+{% extends 'animeval/base-mod.html' %}
 {% load static %} 
 {%block content%}
     <link rel="stylesheet" href="{% static 'post.css' %}">
@@ -30,54 +30,79 @@
                     </div>
                     <div id='evaluation'>
                         <div>
-                        <p>ストーリー</p>
-                            <select name="eva_senario">
-                                <option value=1>1</option>
-                                <option value=2>2</option>
-                                <option value=3>3</option>
-                                <option value=4>4</option>
-                                <option value=5>5</option>
-                            </select>
+                            <p>ストーリー</p>
+                            <div class="story-stars">
+                                <input id="star5" type="radio" name="eva_senario" value="5" />
+                                <label for="star5">★</label>
+                                <input id="star4" type="radio" name="eva_senario" value="4" />
+                                <label for="star4">★</label>
+                                <input id="star3" type="radio" name="eva_senario" value="3" />
+                                <label for="star3">★</label>
+                                <input id="star2" type="radio" name="eva_senario" value="2" />
+                                <label for="star2">★</label>
+                                <input id="star1" type="radio" name="eva_senario" value="1" />
+                                <label for="star1">★</label>
+                            </div>
                         </div>
                         <div>
-                        <p>作画</p>
-                            <select name="eva_drawing">
-                                <option value=1>1</option>
-                                <option value=2>2</option>
-                                <option value=3>3</option>
-                                <option value=4>4</option>
-                                <option value=5>5</option>
-                            </select>
+                            <p>作画</p>
+                            <div class="draw-stars">
+                                <input id="d-star5" type="radio" name="eva_drawing" value="5" />
+                                <label for="d-star5">★</label>
+                                <input id="d-star4" type="radio" name="eva_drawing" value="4" />
+                                <label for="d-star4">★</label>
+                                <input id="d-star3" type="radio" name="eva_drawing" value="3" />
+                                <label for="d-star3">★</label>
+                                <input id="d-star2" type="radio" name="eva_drawing" value="2" />
+                                <label for="d-star2">★</label>
+                                <input id="d-star1" type="radio" name="eva_drawing" value="1" />
+                                <label for="d-star1">★</label>
+                            </div>
                         </div>
                         <div>
                         <p>音楽</p>
-                            <select name="eva_music">
-                                <option value=1>1</option>
-                                <option value=2>2</option>
-                                <option value=3>3</option>
-                                <option value=4>4</option>
-                                <option value=5>5</option>
-                            </select>
+                            <div class="music-stars">
+                                <input id="m-star5" type="radio" name="eva_music" value="5" />
+                                <label for="m-star5">★</label>
+                                <input id="m-star4" type="radio" name="eva_music" value="4" />
+                                <label for="m-star4">★</label>
+                                <input id="m-star3" type="radio" name="eva_music" value="3" />
+                                <label for="m-star3">★</label>
+                                <input id="m-star2" type="radio" name="eva_music" value="2" />
+                                <label for="m-star2">★</label>
+                                <input id="m-star1" type="radio" name="eva_music" value="1" />
+                                <label for="m-star1">★</label>
+                            </div>
                         </div>
                         <div>
                         <p>キャラクター</p>
-                            <select name="eva_character">
-                                <option value=1>1</option>
-                                <option value=2>2</option>
-                                <option value=3>3</option>
-                                <option value=4>4</option>
-                                <option value=5>5</option>
-                            </select>
+                            <div class="chara-stars">
+                                <input id="ch-star5" type="radio" name="eva_character" value="5" />
+                                <label for="ch-star5">★</label>
+                                <input id="ch-star4" type="radio" name="eva_character" value="4" />
+                                <label for="ch-star4">★</label>
+                                <input id="ch-star3" type="radio" name="eva_character" value="3" />
+                                <label for="ch-star3">★</label>
+                                <input id="ch-star2" type="radio" name="eva_character" value="2" />
+                                <label for="ch-star2">★</label>
+                                <input id="ch-star1" type="radio" name="eva_character" value="1" />
+                                <label for="ch-star1">★</label>
+                            </div>
                         </div>
                         <div>
                         <p>声優</p>
-                            <select name="eva_cv">
-                                <option value=1>1</option>
-                                <option value=2>2</option>
-                                <option value=3>3</option>
-                                <option value=4>4</option>
-                                <option value=5>5</option>
-                            </select>
+                            <div class="cv-stars">
+                                <input id="cv-star5" type="radio" name="eva_cv" value="5" />
+                                <label for="cv-star5">★</label>
+                                <input id="cv-star4" type="radio" name="eva_cv" value="4" />
+                                <label for="cv-star4">★</label>
+                                <input id="cv-star3" type="radio" name="eva_cv" value="3" />
+                                <label for="cv-star3">★</label>
+                                <input id="cv-star2" type="radio" name="eva_cv" value="2" />
+                                <label for="cv-star2">★</label>
+                                <input id="cv-star1" type="radio" name="eva_cv" value="1" />
+                                <label for="cv-star1">★</label>
+                            </div>
                         </div>
                     </div>
                     <div id = 'button'>
@@ -87,8 +112,9 @@
             </section>
         </div>
     </div>
-    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        'use strict';
         const list = [
             {% for anime in anime_title_list %}
             "{{anime}}",
@@ -102,7 +128,7 @@
             let elIn = document.getElementById('search');
             list.forEach( (item) => {
                 if (elInput !== ''){
-                    if (item.indexOf(elInput) !== -1) {
+                    if (item.startsWith(elInput)) {
                         nameList.push(item);
                     }
                 }
@@ -129,5 +155,16 @@
                 render();
             })
         }
+
+        $(function () {
+            $('input,textarea')
+            .focus(function () {
+                $(this).css('background','#333').css('color','aliceblue');
+            })
+            .blur(function () {
+                $(this).css('background','white');
+            })
+        })
+
         </script>
 {%endblock content%}
