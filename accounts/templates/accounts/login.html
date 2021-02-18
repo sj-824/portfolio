@@ -1,7 +1,10 @@
 {% extends 'accounts/base2.html' %}
 {% load socialaccount %}
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'login-mod.css' %}">
 <div id = 'wrapper'>
+    <a class = 'signup' href="{% url 'accounts:user_create' %}">新規登録はこちらから</a>
     <form action="" method = 'POST'>
         <div>
             <div>
